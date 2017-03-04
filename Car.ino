@@ -1,91 +1,43 @@
-char inChar=-1; 
-char XinData[3]; 
-char YinData[3]; 
-
-bool logX = false;
-bool logY = false;
-
-int Xindex;
-int Yindex;
-
+String inData;
 String JoyX ="";
 String JoyY ="";
 
-int x_joystick = 0;
-int y_joystick = 0;
-
-#define OUT
-
 #include <SoftwareSerial.h>
-SoftwareSerial mySerial(10, 11); // RX, TX
+SoftwareSerial xBee(14, 15); // RX, TX
 
-void setup(){
-  
-  Serial.begin(9600);
-  mySerial.begin(9600);
+void setup() {
+    Serial.begin(9600);
+    Serial.println("Waiting for Raspberry Pi to send a signal...\n");
+    xBee.begin(9600);
 }
 
-void loop() 
-{
-  OUT getJoystick();
-  Serial.println("*********");
-  Serial.println(x_joystick);
-  Serial.println(y_joystick);
-  Serial.println("*********");
-  Serial.println("");
-   
-}
-
-void getJoystick(){
-  if (mySerial.available()>0){
+void loop() {
     
-            inChar = mySerial.read();
+    while (xBee.available() > 0)
+    {
+       update_joy();
+    }
+    Serial.println("");
+    Serial.println(JoyX);
+    Serial.println(JoyY);
+    Serial.println("");
+    
+}
 
-            if (logX){
-              
-              if (inChar != '.'){
-                  XinData[Xindex] =inChar;
-                  Xindex += 1;
-              }
-              else
-                logX = false;
-            }
+void update_joy(){
+ 
+  char recieved = xBee.read();
+        inData += recieved; 
 
-            if (logY){
-              
-              if (inChar != '.'){
-                YinData[Yindex] =inChar;
-                Yindex += 1;  
-              }
-              else
-                logY = false;
-            }
-            
-            if (inChar == 'X'){
-              logX = true;
-              Xindex = 0;
-              
-            }
-              
-
-            if (inChar == 'Y'){
-              logY = true;
-              Yindex = 0;
-              
-            }
-
-        }
-
-        for (int i=0;i<3;i++)
+        // Process message when new line character is recieved
+        if (recieved == '\n')
         {
-          JoyX += String(XinData[i]);
-          JoyY += String(YinData[i]);
-        }
-    
-        x_joystick = JoyX.toInt();
-        y_joystick = JoyY.toInt();
+            //Serial.print("Arduino Received: ");
+            //Serial.print(inData);
+            JoyX = inData.substring(0,3);
+            JoyY = inData.substring(3,6);
 
-        JoyY="";
-        JoyX="";
+            inData = ""; // Clear recieved buffer
+        }
 }
 
