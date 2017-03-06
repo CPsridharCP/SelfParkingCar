@@ -4,6 +4,7 @@ String final_out;
 String xOut = "";
 String yOut = "";
 
+// Initialising Soft Serial
 #include <SoftwareSerial.h>
 SoftwareSerial mySerial(10, 11); // RX, TX
 
@@ -17,13 +18,16 @@ void setup() {
 void loop() {
 
   
-  
+  // Reading pot values from analig joystick
   x = analogRead(A0);
   y = analogRead(A1);
+
+  // mapping voltage as in range 0-1024 to 0-255
   x= map(x,0,1024,0,255);
   y= map(y,0,1024,0,255);
 
-
+  // Streing manipulation to maintain a constant 
+  // three digit for values from the joystick
   if (x<10){
     xOut="00"+String(x);
   }
@@ -44,17 +48,13 @@ void loop() {
     yOut=String(y);
   }
 
-  
-  //mySerial.print(String("X"+xOut+"."));
-  //mySerial.println(String("Y"+yOut+"."));
+  // Concatinating X and Y values from joystck and sending 
+  // them through Xbee using the soft serial port
   mySerial.println(xOut+yOut);
-  //Serial.print(String("X"+xOut+"."));
-  //Serial.println(String("Y"+yOut+"."));
 
-
- 
+  // Comment this line if you are not debugging
+  Serial.println(xOut+yOut);
   
-  //delay(100);
   xOut="";
   yOut="";
   mySerial.flush();
